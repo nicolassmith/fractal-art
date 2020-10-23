@@ -28,7 +28,7 @@ function mandelbrot_steps(c::Complex, max_steps::Integer)
         mandelbrot_function(c), mandelbrot_condition, max_steps)
 end
 
-function get_cmap(colorscheme::ColorScheme, max_steps)
+function get_cmap(colorscheme::ColorScheme, max_steps::Integer)
     return [colorscheme[num_steps / (max_steps + 1)] 
         for num_steps in 1:max_steps+1]
 end
