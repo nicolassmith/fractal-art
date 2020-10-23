@@ -1,13 +1,11 @@
-using Images, Colors, ColorSchemes
+using Images, ColorSchemes, ImageFiltering, ImageTransformations
 using Pipe
-using CuArrays, GPUArrays
-using ImageFiltering
+using CuArrays
 
-# Define the function for counting the steps to divergence.
-
+# Function for counting the steps to divergence.
 function recurse_steps_to_satisfy(
     f::Function, condition::Function, max_steps::Integer)
-    z = Complex(0, 0)
+    z = Complex(0.0, 0.0)
     for i = 1:max_steps
         z = f(z)
         if condition(z)
@@ -48,12 +46,12 @@ blur_kernel = Kernel.gaussian(resample_factor/2)
 width = 1920
 height = 1080
 
-center = (-0.75393, 0.05)
+center_loc = (-0.75393, 0.05)
 
 horizontal_extent = width * pixel_size
 vertical_extent = height * pixel_size
-real_domain = center[1]-horizontal_extent/2:pixel_size/resample_factor:center[1]+horizontal_extent/2
-imaginary_domain = center[2]-vertical_extent/2:pixel_size/resample_factor:center[2]+vertical_extent/2
+real_domain = center_loc[1]-horizontal_extent/2:pixel_size/resample_factor:center_loc[1]+horizontal_extent/2
+imaginary_domain = center_loc[2]-vertical_extent/2:pixel_size/resample_factor:center_loc[2]+vertical_extent/2
 # The imaginary domain is reversed so that the image comes out with the correct orientation.
 imaginary_domain = reverse(imaginary_domain)
 
@@ -61,13 +59,13 @@ complex_domain = [Complex(x, y) for y in imaginary_domain, x in real_domain]
 color_map = get_cmap(colorscheme, max_steps)
 
 @time begin
-    # Casting as CuArray sends the computation to the GPU.
-    steps = @pipe complex_domain |> CuArray |> mandelbrot_steps.(_, max_steps) |> Array
-    image = color_map[steps]
-    image = imfilter(image, blur_kernel)
-    image = image[1:resample_factor:end-1,1:resample_factor:end-1]
+    image = @pipe complex_domain |> 
+        CuArray |> # Casting as CuArray sends the computation to the GPU.
+        mandelbrot_steps.(_, max_steps) |> 
+        Array |>
+        color_map[_] |>
+        imfilter(_, blur_kernel) |>
+        imresize(_, (height, width))
 end
 
 save("image.png", image)
-
-image
