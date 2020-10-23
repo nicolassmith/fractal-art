@@ -35,7 +35,7 @@ end
 
 # Color space.
 colorscheme = ColorSchemes.inferno
-max_steps = 5000
+max_steps = 2500
 
 # Lay out the complex domain to evaluate.
 pixel_size = 0.0000001
