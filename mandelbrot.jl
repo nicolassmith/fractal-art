@@ -1,6 +1,6 @@
 using Images, ColorSchemes, ImageFiltering, ImageTransformations
 using Pipe
-using CuArrays
+using CUDA
 
 # Function for counting the steps to divergence.
 function recurse_steps_to_satisfy(
