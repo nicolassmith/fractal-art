@@ -33,7 +33,7 @@ function get_cmap(colorscheme::ColorScheme, max_steps::Integer)
             for num_steps = 1:max_steps+1]
 end
 
-function get_complex_domain(pixel_size, center_loc, width, height)
+function get_complex_domain(pixel_size, center_loc, width, height, resample_factor)
     horizontal_extent = width * pixel_size
     vertical_extent = height * pixel_size
     real_domain = (
@@ -60,19 +60,19 @@ end
 colorscheme = ColorSchemes.inferno
 max_steps = 2500
 
+color_map = get_cmap(colorscheme, max_steps)
+
 # Lay out the complex domain to evaluate.
 pixel_size = 0.0000001
-
-resample_factor = 2
-blur_kernel = Kernel.gaussian(resample_factor / 2)
-
 width = 1920
 height = 1080
-
 center_loc = (-0.75393, 0.05)
+resample_factor = 2
 
-complex_domain = get_complex_domain(pixel_size, center_loc, width, height)
-color_map = get_cmap(colorscheme, max_steps)
+complex_domain = get_complex_domain(pixel_size, center_loc, width, height, resample_factor)
+
+# Antialiasing filter.
+blur_kernel = Kernel.gaussian(resample_factor / 2)
 
 @time begin
     image = @pipe complex_domain |>
